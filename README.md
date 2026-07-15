@@ -20,6 +20,9 @@ npm run dev      # http://127.0.0.1:4174/
 npm run build && npm run preview
 ```
 
+**Live (GitHub Pages):** https://mellowambience.github.io/aetherscape-3d/  
+(after first Actions deploy completes)
+
 ## Eclipse
 
 See [docs/INTEGRATION.md](docs/INTEGRATION.md) and [eclipse/EclipseAetherScape3D.java](eclipse/EclipseAetherScape3D.java).
