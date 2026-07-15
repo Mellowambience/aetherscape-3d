@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1020" />
+    <title>AetherScape 3D · Ley-Root Hollow</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="world" aria-hidden="true"></div>
+
+      <section id="boot">
+        <div class="boot-card">
+          <h1>AetherScape 3D</h1>
+          <p>
+            Local-first OSRS-feel vertical slice in Ley-Root Hollow. Orthographic Three.js world,
+            fixed 20&nbsp;Hz sim, gather · craft · combat · quest — original Aether content.
+          </p>
+          <div class="field">
+            <label for="name-input">Wayfarer name</label>
+            <input id="name-input" type="text" maxlength="18" placeholder="Amara" autocomplete="off" />
+          </div>
+          <div class="field">
+            <span>Cloak palette</span>
+            <div id="palette-row" class="palette-row"></div>
+          </div>
+          <div class="boot-actions">
+            <button type="button" id="start-btn">Enter Ley-Root Hollow</button>
+            <button type="button" id="continue-btn">Continue</button>
+          </div>
+          <div id="boot-message"></div>
+        </div>
+      </section>
+
+      <div id="hud" hidden>
+        <div class="top-left panel">
+          <div id="player-name">—</div>
+          <div class="health-bar"><div id="health-fill"></div></div>
+          <div id="health-text" class="muted">40/40</div>
+          <div id="day-phase" data-phase="day" class="day-phase">Day</div>
+          <div style="margin-top:0.55rem">
+            <div id="objective-title"></div>
+            <div id="objective-detail" class="muted"></div>
+          </div>
+        </div>
+
+        <div class="top-right panel">
+          <canvas id="minimap" width="148" height="110" aria-label="Minimap"></canvas>
+        </div>
+
+        <div class="bottom-left panel">
+          <h2>Vale log</h2>
+          <div id="event-log"></div>
+        </div>
+
+        <div class="bottom-right panel muted" style="font-size:0.82em;line-height:1.35">
+          Click ground · WASD · E interact<br />
+          I inventory · J journal · Esc settings<br />
+          Right-drag rotate · wheel zoom · Home reset
+        </div>
+
+        <div class="bottom-center">
+          <button type="button" id="interact-prompt" hidden></button>
+          <div id="task-bar" hidden><div id="task-fill"></div></div>
+        </div>
+
+        <section id="panel-inventory" class="panel center-panel" hidden>
+          <h2>Inventory &amp; skills</h2>
+          <div id="inventory-grid"></div>
+          <div id="skills-list"></div>
+        </section>
+
+        <section id="panel-journal" class="panel center-panel" hidden>
+          <h2>Quest journal</h2>
+          <div id="journal-body"></div>
+        </section>
+
+        <section id="panel-dialogue" class="panel center-panel" hidden>
+          <h2 id="dialogue-speaker">—</h2>
+          <p id="dialogue-text"></p>
+          <button type="button" id="dialogue-next">Continue</button>
+        </section>
+
+        <section id="panel-craft" class="panel center-panel" hidden>
+          <h2>Shrine Loom</h2>
+          <p class="muted">Recipes consume inventory items and grant Attunement XP.</p>
+          <div id="craft-list" class="setting-actions" style="display:grid;gap:0.4rem"></div>
+          <div class="setting-actions">
+            <button type="button" id="craft-close">Close</button>
+          </div>
+        </section>
+
+        <section id="panel-bank" class="panel center-panel" hidden>
+          <h2>Bank chest</h2>
+          <div id="bank-body"></div>
+          <div class="setting-actions">
+            <button type="button" id="bank-deposit">Deposit all</button>
+            <button type="button" id="bank-withdraw">Withdraw all</button>
+            <button type="button" id="bank-close">Close</button>
+          </div>
+        </section>
+
+        <section id="panel-settings" class="panel center-panel" hidden>
+          <h2>Settings</h2>
+          <form id="settings-form">
+            <label class="setting-row"><span>Autosave</span><input type="checkbox" data-setting="autosave" /></label>
+            <label class="setting-row"><span>Show grid</span><input type="checkbox" data-setting="showGrid" /></label>
+            <label class="setting-row"><span>Reduced motion</span><input type="checkbox" data-setting="reducedMotion" /></label>
+            <label class="setting-row"><span>High contrast</span><input type="checkbox" data-setting="highContrast" /></label>
+            <label class="setting-row"><span>UI scale</span><input type="range" min="0.8" max="1.25" step="0.05" data-setting="uiScale" /></label>
+            <label class="setting-row"><span>Camera zoom</span><input type="range" min="0.7" max="1.45" step="0.05" data-setting="cameraZoom" /></label>
+          </form>
+          <div class="setting-actions">
+            <button type="button" id="save-btn">Save now</button>
+            <button type="button" id="load-btn">Load</button>
+            <button type="button" id="export-btn">Export JSON</button>
+            <label class="button-like"><input id="import-input" type="file" accept="application/json,.json" hidden />Import</label>
+            <button type="button" id="reset-btn">Delete character</button>
+          </div>
+        </section>
+      </div>
+
+      <div id="toast" hidden></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
