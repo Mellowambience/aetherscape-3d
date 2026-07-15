@@ -1,79 +1,48 @@
-# AetherScape 3D ↔ RunTek Eclipse integration
+# Eclipse host glue is now a real compileable package.
 
-## Status
-
-Playable local 3D vertical slice with evolved systems + host bridge.
-Java glue is **reference source** (not compiled here — no JDK in agent env).
-
-## Files
-
-| Path | Role |
-| --- | --- |
-| `src/main.ts` | `window.AetherScape3DHost` bridge |
-| `eclipse/EclipseAetherScape3D.java` | JCEF lifecycle wrapper |
-| `dist/` | Production static site after `npm run build` |
-
-## Assumptions (confirm for your Eclipse shell)
-
-1. **A1 — JCEF/CEF panel** with its own Chromium + GL context.
-2. **A2 — Lifecycle events**, not a free per-frame JS inject. Default: page self-animates with rAF; you only `pause`/`resume`/`save`/`dispose` on hide/show/exit.
-3. **A3 — three.js is bundled in the page.** Do not share a Java GL context.
-
-If your host *does* have a shared frame pump, open with `externalLoop=1` and call `tick(dt)` + `render()` each frame.
-
-## Host API (`window.AetherScape3DHost`)
-
-| Method | Purpose |
-| --- | --- |
-| `pause()` / `resume()` | Freeze / unfreeze sim |
-| `tick(dtSeconds)` | Host-driven sim step (external loop) |
-| `render()` | Paint current state |
-| `save()` / `load()` | localStorage slot |
-| `exportSave()` / `importSaveJson(raw)` | JSON snapshot |
-| `setExternalLoop(bool)` | Stop/start internal rAF |
-| `dispose()` | Teardown + save |
-| `state()` | `{ tick, dayPhase, questStage, health, skills, ... }` |
-
-## Recommended Eclipse wiring
-
-```java
-// Pseudocode
-EclipseAetherScape3D game = new EclipseAetherScape3D(cefBrowser);
-
-// Prefer built dist for shipping, vite preview for dev:
-game.open("http://127.0.0.1:4174/", /* externalLoop */ false);
-// or: game.open("file:///C:/Users/nator/aether-garden-tex/aetherscape-3d/dist/index.html");
-
-// On panel hide:
-game.onHide();   // save + pause
-
-// On panel show:
-game.onShow();   // resume
-
-// On leave game state:
-game.onExit();   // dispose
-```
-
-## Local commands
+## Build (verified)
 
 ```bash
-cd aetherscape-3d
-npm install
-npm test
-npm run build
-npm run preview   # http://127.0.0.1:4174/
+# needs JDK 11+ on PATH (Temurin LTS via scoop: scoop install temurin-lts-jdk)
+export PATH="$HOME/scoop/apps/temurin-lts-jdk/current/bin:$PATH"
+bash eclipse/build.sh
+# or: eclipse\build.bat
 ```
 
-## Evolved gameplay (v0.2)
+Produces:
 
-- **Crystal Mining** skill + ley-crystal nodes (north ridge)
-- **Ward Charm** recipe (shellshard + raw-crystal) → temporary damage reduction
-- **Bank chest** (storehouse) deposit/withdraw all
-- **Day/night** cycle (~30s / ~20s at 20 Hz); night aggro/damage up
-- 3 Gloamticks; richer Curator dialogue after quest
+- `eclipse/out/aetherscape-eclipse-glue.jar`
+- runs `FakeBrowserHarness` → `ECLIPSE_GLUE_OK` + `eclipse/out/harness-log.txt`
 
-## Caveats
+## Layout
 
-- Java glue uncompiled — paste into Eclipse module and adapt `JsBrowser` to your CEF types.
-- `file://` may block ES modules depending on CEF flags; prefer `http://127.0.0.1` or custom scheme.
-- Client-authoritative local slice — not multiplayer-safe.
+```
+eclipse/
+  build.sh / build.bat
+  src/com/aetherhaven/eclipse/EclipseAetherScape3D.java
+  src/com/aetherhaven/eclipse/jcef/CefBrowserAdapterNotes.java
+  src/com/aetherhaven/eclipse/test/FakeBrowserHarness.java
+  out/   (generated — gitignored)
+```
+
+## Wire real JCEF
+
+Implement `EclipseAetherScape3D.JsBrowser` against your `CefBrowser` (see
+`CefBrowserAdapterNotes`). Then:
+
+```java
+EclipseAetherScape3D game = new EclipseAetherScape3D(adapter);
+game.open("https://mellowambience.github.io/aetherscape-3d/", false);
+// hide → onHide(); show → onShow(); exit → onExit();
+```
+
+## Host API (JS)
+
+`window.AetherScape3DHost`: pause/resume/tick/render/save/load/exportSave/
+importSaveJson/setExternalLoop/dispose/state
+
+## Assumptions
+
+1. JCEF/CEF panel with own Chromium + GL.
+2. Lifecycle events (not free per-frame JS inject) — default self-animating page.
+3. three.js bundled in page — do not share Java GL with it.
